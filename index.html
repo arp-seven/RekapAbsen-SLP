@@ -1,0 +1,2584 @@
+<!-- update terbaru -->
+
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aplikasi Rekap Absen</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f4f7fa;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #2b7de9;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+
+      nav {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        background-color: #e6eef9;
+        padding: 10px 0;
+        box-shadow: inset 0 -1px 0 #d0dbe8;
+      }
+
+      nav button {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      nav button:hover {
+        background-color: #2b7de9;
+        color: white;
+        border-color: #2b7de9;
+      }
+
+      .container {
+        padding: 30px;
+        max-width: 1000px;
+        margin: auto;
+      }
+
+      .section {
+        display: none;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .active {
+        display: block;
+      }
+
+      h3 {
+        color: #2b7de9;
+      }
+
+      form input,
+      form button,
+      input[type="date"],
+      input[type="month"] {
+        padding: 10px;
+        margin: 5px 5px 10px 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+
+      form button {
+        background-color: #2b7de9;
+        color: white;
+        border: none;
+        font-weight: bold;
+      }
+
+      form button:hover {
+        background-color: #256ad3;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      th {
+        background-color: #2b7de9;
+        color: white;
+      }
+
+      td button {
+        margin-right: 5px;
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+
+      td button:hover {
+        opacity: 0.8;
+      }
+
+      .delete-btn {
+        background-color: #dc3545;
+        color: white;
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+        font-weight: 600;
+      }
+
+      .btn {
+        background-color: #2b7de9;
+        color: white;
+        border: none;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #256ad3;
+      }
+
+      .editable-date, .editable-shift {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.editable-date:hover, .editable-shift:hover {
+    background-color: #e9ecef;
+}
+
+.editable-date:after, .editable-shift:after {
+    content: "✏️";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+}
+
+.editable-date:hover:after, .editable-shift:hover:after {
+    opacity: 1;
+}
+
+.edit-mode-input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+.edit-mode-select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+    background-color: white;
+}
+
+.edit-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.edit-actions button {
+    padding: 6px 12px;
+    font-size: 13px;
+    width: 70px; /* Make buttons same width */
+    text-align: center;
+}
+
+/* Add this for better button styling */
+.btn-simpan {
+    background-color: #28a745 !important;
+    margin-bottom: 2px;
+}
+
+.btn-batal {
+    background-color: #dc3545 !important;
+}
+
+.table-cell {
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.btn {
+    /* existing styles */
+    border: none;
+    color: white;
+    font-weight: 500;
+}
+
+/* Add for the edit button */
+.btn[onclick="enableEditMode()"] {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.keterangan-cell {
+    min-width: 120px;
+}
+
+.keterangan-dropdown {
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    font-family: "Inter", sans-serif;
+}
+
+.absensi-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 100px;
+}
+
+.btn-simpan-absen {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-batal-absen {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#laporan table th {
+  background-color: #2b7de9;
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+#laporan table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+#laporan table td {
+  padding: 8px 12px;
+}
+
+#filterBulanLaporan {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-right: 10px;
+}
+
+#backupRestore {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#backupRestore h4 {
+  color: #2b7de9;
+  margin-bottom: 10px;
+}
+
+#backupRestore .btn {
+  padding: 10px 15px;
+  margin-top: 5px;
+}
+
+#importFile {
+  display: block;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 300px;
+}
+
+
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h2>📋 Aplikasi Rekap Absen</h2>
+    </header>
+
+    <nav>
+      <button onclick="showSection('jamShift')">Jam Shift</button>
+      <button onclick="showSection('dataShift')">Data Shift</button>
+      <button id="fullscreen" onclick="showSection('absen')">
+        Input Absen
+      </button>
+      <button onclick="showSection('laporan')">Laporan Absen</button>
+      <button onclick="showSection('backupRestore')">Database</button>
+    </nav>
+
+    <div class="container">
+      <!-- JAM SHIFT -->
+      <div id="jamShift" class="section active">
+        <h3>Jam Shift</h3>
+        <form onsubmit="addShift(event)">
+          <input type="text" id="kodeShift" placeholder="Kode Shift" required />
+          <input type="text" id="shiftName" placeholder="Nama Shift" required />
+          <input type="time" id="jamMasuk" />
+          <input type="time" id="jamKeluar" />
+          <select
+            id="jenisShift"
+            style="
+              padding: 10px;
+              margin: 5px 5px 10px 0;
+              border-radius: 6px;
+              border: 1px solid #ccc;
+              font-size: 14px;
+            "
+          >
+            <option value="">Pilih Unit</option>
+            <option value="ADMIN-RTB">ADMIN-RTB</option>
+            <option value="HK-RTB">HK-RTB</option>
+            <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+            <option value="CETAK-KARTU">CETAK-KARTU</option>
+            <option value="HK-BLI">HK-BLI</option>
+            <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+          </select>
+          <button type="submit">Simpan</button>
+        </form>
+        <table>
+          <thead>
+            <tr>
+              <th>Kode Shift</th>
+              <th>Nama Shift</th>
+              <th>Jam Masuk</th>
+              <th>Jam Keluar</th>
+              <th>Jenis</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="shiftTable"></tbody>
+        </table>
+      </div>
+
+      <!-- DATA SHIFT -->
+      <div id="dataShift" class="section">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3>Data Shift</h3>
+          <button
+            class="btn"
+            onclick="toggleImportForm()"
+            style="margin-left: auto"
+          >
+            Import Data
+          </button>
+        </div>
+
+        <div
+          id="importForm"
+          style="
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #dce1e7;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+          "
+        >
+          <div
+            style="
+              display: flex;
+              flex-wrap: wrap;
+              gap: 30px;
+              align-items: flex-end;
+              justify-content: space-between;
+            "
+          >
+            <!-- Pilih Bulan -->
+            <div style="flex: 1">
+              <label
+                for="bulanImport"
+                style="
+                  font-weight: 600;
+                  margin-bottom: 5px;
+                  display: block;
+                  color: #333;
+                "
+                >Pilih Bulan</label
+              >
+              <select
+                id="bulanImport"
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  border-radius: 6px;
+                  border: 1px solid #ccc;
+                  font-size: 14px;
+                "
+              >
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+            </div>
+
+            <!-- Jenis Data -->
+            <div style="flex: 1">
+              <label for="jenisData">Jenis Unit</label>
+              <select
+                id="jenisData"
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  border-radius: 6px;
+                  border: 1px solid #ccc;
+                  font-size: 14px;
+                "
+              >
+              <option value="">Jenis Unit</option>
+              <option value="ADMIN-RTB">ADMIN-RTB</option>
+              <option value="HK-RTB">HK-RTB</option>
+              <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+              <option value="CETAK-KARTU">CETAK-KARTU</option>
+              <option value="HK-BLI">HK-BLI</option>
+              <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+              </select>
+            </div>
+
+            <!-- File Upload -->
+            <div style="flex: 2">
+              <label
+                for="excelFileInput"
+                style="
+                  font-weight: 600;
+                  margin-bottom: 5px;
+                  display: block;
+                  color: #333;
+                "
+                >Upload File Excel</label
+              >
+              <input
+                type="file"
+                id="excelFileInput"
+                accept=".xlsx, .xls"
+                style="
+                  width: 100%;
+                  padding: 9px 10px;
+                  border-radius: 6px;
+                  border: 1px solid #ccc;
+                  font-size: 14px;
+                "
+              />
+            </div>
+
+            <!-- Upload Button -->
+            <div style="flex-shrink: 0">
+              <button
+                onclick="handleImport()"
+                style="
+                  color: black;
+                  padding: 12px 15px;
+                  border: 1px solid #ccc;
+                  border-radius: 6px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  transition: background 0.3s;
+                "
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Pencarian Data Shift -->
+        <div>
+          <div style="display: flex; gap: 10px; align-items: center" >
+            <!-- Pencarian Nama -->
+            <input
+              type="text"
+              id="searchNama"
+              placeholder="Cari Nama"
+              style="
+                flex: 2;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 120px;
+              "
+            />
+
+            <!-- Filter Tanggal -->
+            <input
+              type="date"
+              id="filterTanggal"
+              style="
+                flex: 1;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 150px;
+              "
+            />
+
+            <!-- Filter Jenis -->
+            <select
+              id="filterJenis"
+              style="
+                flex: 1;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 150px;
+              "
+            >
+            <option value="">Pilihan Unit</option>
+            <option value="ADMIN-RTB">ADMIN-RTB</option>
+            <option value="HK-RTB">HK-RTB</option>
+            <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+            <option value="CETAK-KARTU">CETAK-KARTU</option>
+            <option value="HK-BLI">HK-BLI</option>
+            <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+            </select>
+
+            <!-- Tombol -->
+            <div style="display: flex; gap: 8px">
+              <button
+                onclick="filterDataShift()"
+                style="
+                  padding: 10px 15px;
+                  background-color: #2b7de9;
+                  color: white;
+                  border: none;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                Cari
+              </button>
+              <button
+                onclick="resetFilterShift()"
+                style="
+                  padding: 10px 15px;
+                  background-color: #f0f0f0;
+                  color: #333;
+                  border: 1px solid #ddd;
+                  border-radius: 6px;
+                  cursor: pointer;
+                "
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <!-- <th>Nama</th>
+              <th>Team Leader</th>
+              <th>Plotingan</th>
+              <th>Tanggal</th>
+              <th>Shift</th>
+              <th>Jenis</th>
+              <th>Keterangan</th> -->
+            </tr>
+          </thead>
+          <tbody id="dataShiftTable"></tbody>
+        </table>
+        <div id="shiftNavigation" style="margin-top: 10px"></div>
+      </div>
+
+    <!-- ABSEN -->
+    <div
+      id="absen"
+      class="section"
+      style="padding: 20px; box-sizing: border-box"
+    >
+      <!-- Header dan tombol -->
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Input Absen</h3>
+        <div>
+            <button class="btn" onclick="toggleImportFormAbsen()" style="margin-right: 10px;">
+                Import Data
+            </button>
+            <button class="btn" onclick="exportAbsenPerBulan()">
+                Export Data
+            </button>
+        </div>
+    </div>
+
+      <!-- Form upload -->
+      <div
+        id="importFormAbsen"
+        style="
+          display: none;
+          margin: 20px 0;
+          padding: 20px;
+          background: #ffffff;
+          border: 1px solid #dce1e7;
+          border-radius: 10px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        "
+      >
+     
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: flex-end;
+          "
+        >
+        <div style="flex: 1">
+        <label
+        for="jenisData"
+        style="font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+        color: #333;"
+        
+        >Jenis Unit</label
+      >
+
+        <select
+          id="jenisDataAbsen"
+          style="
+          width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+          "
+        >
+        
+          <option value="">Pilih Unit</option>
+          <option value="ADMIN-RTB">ADMIN-RTB</option>
+          <option value="HK-RTB">HK-RTB</option>
+          <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+          <option value="CETAK-KARTU">CETAK-KARTU</option>
+          <option value="HK-BLI">HK-BLI</option>
+          <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+        </select>
+      </div>
+
+          <div style="flex: 2">
+            <label
+              for="excelFileAbsen"
+              style="
+                font-weight: 600;
+                margin-bottom: 5px;
+                display: block;
+                color: #333;
+              "
+            >
+              Upload File Excel
+            </label>
+            <input
+              type="file"
+              id="excelFileAbsen"
+              accept=".xlsx, .xls"
+              style="
+                width: 100%;
+                padding: 9px 10px;
+                border-radius: 6px;
+                border: 1px solid #ccc;
+                font-size: 14px;
+              "
+            />
+          </div>
+          
+          <div style="flex-shrink: 0">
+            <button
+              onclick="handleAbsenImport()"
+              style="
+                color: black;
+                padding: 12px 15px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s;
+              "
+            >
+              Upload
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="exportFormAbsen" style="display: none; margin: 20px 0; padding: 20px; background: #ffffff; border: 1px solid #dce1e7; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-end;">
+            <div style="flex: 1">
+                <label for="bulanExportAbsen" style="font-weight: 600; margin-bottom: 5px; display: block; color: #333;">
+                    Pilih Bulan
+                </label>
+                <input type="month" id="bulanExportAbsen" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
+            </div>
+            <div style="flex: 1">
+                <label for="jenisExportAbsen" style="font-weight: 600; margin-bottom: 5px; display: block; color: #333;">
+                    Jenis Unit
+                </label>
+                <select id="jenisExportAbsen" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
+                    <option value="">Pilih Unit</option>
+                    <option value="ADMIN-RTB">ADMIN-RTB</option>
+                    <option value="HK-RTB">HK-RTB</option>
+                    <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+                    <option value="CETAK-KARTU">CETAK-KARTU</option>
+                    <option value="HK-BLI">HK-BLI</option>
+                    <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+                </select>
+            </div>
+            <div style="flex-shrink: 0">
+                <button onclick="prosesExportAbsen()" style="color: black; padding: 12px 15px; border: 1px solid #ccc; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.3s;">
+                    Export
+                </button>
+            </div>
+        </div>
+    </div>
+      <!-- Form Pencarian Data Absen -->
+
+      <div>
+        <div style="display: flex; gap: 10px; align-items: center" >
+          <!-- Pencarian Nama -->
+          <input
+            type="text"
+            id="searchNamaAbsen"
+            placeholder="Cari Nama"
+            style="
+              flex: 2;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              min-width: 120px;
+            "
+          />
+
+          <!-- Filter Tanggal -->
+          <input
+            type="date"
+            id="filterTanggalAbsen"
+            style="
+              flex: 1;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              min-width: 150px;
+            "
+          />
+
+          <!-- Filter Jenis -->
+          <select
+            id="filterJenisAbsen"
+            style="
+              flex: 1;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 6px;
+              font-size: 14px;
+              min-width: 150px;
+            "
+          >
+          <option value="">Pilihan Unit</option>
+          <option value="ADMIN-RTB">ADMIN-RTB</option>
+          <option value="HK-RTB">HK-RTB</option>
+          <option value="TEKNISI-RTB">TEKNISI-RTB</option>
+          <option value="CETAK-KARTU">CETAK-KARTU</option>
+          <option value="HK-BLI">HK-BLI</option>
+          <option value="TEKNISI-BLI">TEKNISI-BLI</option>
+          </select>
+
+          <!-- Tombol -->
+          <div style="display: flex; gap: 8px">
+            <button
+              onclick="filterDataAbsen()"
+              style="
+                padding: 10px 15px;
+                background-color: #2b7de9;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+              "
+            >
+              Cari
+            </button>
+            <button
+              onclick="resetFilterAbsen()"
+              style="
+                padding: 10px 15px;
+                background-color: #f0f0f0;
+                color: #333;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                cursor: pointer;
+              "
+              >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Wrapper agar tidak overflow -->
+      <div
+        style="
+          overflow-x: auto;
+          background: #fff;
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+        "
+      >
+        <table
+          style="width: 100%; border-collapse: collapse; min-width: 1000px"
+        >
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Tanggal</th>
+              <th>Shift</th>
+              <th>Jam Masuk Shift</th>
+              <th>Jam Absen Masuk</th>
+              <th>Status Masuk</th>
+              <th>Telat</th>
+              <th>Jam Pulang Shift</th>
+              <th>Jam Absen Keluar</th>
+              <th>Status Keluar</th>
+              <th>Pulang Cepat</th>
+              <th>Lembur</th>
+              <th>Keterangan</th>
+              <th>Jenis Unit</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="absenTable"></tbody>
+        </table>
+      </div>
+
+      <br />
+      <div
+        style="
+          margin-bottom: 10px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <div>
+          <button onclick="nextAbsenPage()">Next Data</button>
+          <button onclick="resetAbsenPage()">Reset Halaman</button>
+          <button onclick="hapusSemuaAbsen()">Hapus Semua Data</button>
+           <button onclick="bersihkanDataAbsenTidakValid()" style="background-color: #ffc107; color: #212529;">
+            Bersihkan Data Tidak Valid
+        </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Laporan Absen -->
+
+<div id="laporan" class="section">
+  <h3>Laporan Absen</h3>
+  
+  <div style="margin-bottom: 20px;">
+    <label>Pilih Bulan:</label>
+    <input type="month" id="filterBulanLaporan" onchange="generateLaporan()">
+    <button onclick="exportToExcel()" class="btn">Export ke Excel</button>
+  </div>
+  
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; min-width: 1100px">
+      <thead>
+        <tr>
+          <th>Nama</th>
+          <th>Kehadiran Normal</th>
+          <th>Kehadiran Rill</th>
+          <th>Terlambat</th>
+          <th>Pulang Cepat</th>
+          <th>Cuti</th>
+          <th>Sakit</th>
+          <th>Tidak Tap-In</th>
+          <th>Tidak Tap-Out</th>
+          <th>Jam Kerja</th>
+          <th>Persentase Kehadiran</th>
+        </tr>
+      </thead>
+      <tbody id="laporanTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Backup Restore -->
+
+<div id="backupRestore" class="section">
+  <h3>Database</h3>
+  
+  <div style="margin-bottom: 30px;">
+    <h4>Backup</h4>
+    <p>Export semua data ke file JSON:</p>
+    <button onclick="exportDatabase()" class="btn">Export Data</button>
+  </div>
+  
+  <div>
+    <h4>Restore</h4>
+    <p>Import data dari file backup:</p>
+    <input type="file" id="importFile" accept=".json" style="margin-bottom: 10px;">
+    <button onclick="importDatabase()" class="btn">Import Data</button>
+    <p style="color: red; font-size: 12px; margin-top: 10px;">
+      Peringatan: Import akan menimpa semua data yang ada!
+    </p>
+  </div>
+</div>
+
+
+    <script>
+      // Load dari LocalStorage
+      let shiftData = JSON.parse(localStorage.getItem("shiftData")) || [];
+      let karyawanData = JSON.parse(localStorage.getItem("karyawanData")) || [];
+      let dataShift = JSON.parse(localStorage.getItem("dataShift")) || [];
+      let absenData = JSON.parse(localStorage.getItem("absenData")) || [];
+
+      // Simpan ke LocalStorage
+      function saveData() {
+        localStorage.setItem("shiftData", JSON.stringify(shiftData));
+        localStorage.setItem("karyawanData", JSON.stringify(karyawanData));
+        localStorage.setItem("dataShift", JSON.stringify(dataShift));
+        localStorage.setItem("absenData", JSON.stringify(absenData));
+      }
+
+      // Navigasi
+      function showSection(id) {
+  document.querySelectorAll(".section").forEach((el) => el.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  
+  if (id === "laporan") {
+    // Set nilai default bulan ke bulan ini
+    const now = new Date();
+    const bulanIni = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('filterBulanLaporan').value = bulanIni;
+    
+    generateLaporan();
+  }
+}
+
+      // JAM SHIFT
+      function addShift(e) {
+        e.preventDefault();
+        const kode = document.getElementById("kodeShift").value;
+        const name = document.getElementById("shiftName").value;
+        const masuk = document.getElementById("jamMasuk").value;
+        const keluar = document.getElementById("jamKeluar").value;
+        const jenis = document.getElementById("jenisShift").value;
+
+        shiftData.push({
+          kode,
+          name,
+          masuk,
+          keluar,
+          jenis,
+        });
+
+        saveData();
+        renderShiftTable();
+        e.target.reset();
+      }
+
+      function renderShiftTable() {
+        const tbody = document.getElementById("shiftTable");
+        tbody.innerHTML = "";
+        shiftData.forEach((row, i) => {
+          tbody.innerHTML += `
+        <tr>
+            <td>${row.kode}</td>
+            <td>${row.name}</td>
+            <td>${row.masuk}</td>
+            <td>${row.keluar}</td>
+            <td>${row.jenis}</td>
+            <td>
+                <button onclick="deleteShift(${i})" class="btn">Hapus</button>
+            </td>
+        </tr>`;
+        });
+      }
+
+      function deleteShift(i) {
+        if (confirm("Hapus shift ini?")) {
+          shiftData.splice(i, 1);
+          saveData();
+          renderShiftTable();
+        }
+      }
+
+      // DATA SHIFT
+      let currentPageShift = 0;
+      
+
+      function toggleImportForm() {
+        const form = document.getElementById("importForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+      }
+
+      function renderDataShift(data = dataShift) {
+    const table = document.getElementById("dataShiftTable");
+    if (!table) return;
+
+    table.innerHTML = "";
+
+    // Buat header
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+        <tr>
+            <th>Nama</th>
+            <th>Team Leader</th>
+            <th>Plotingan</th>
+            <th>Tanggal</th>
+            <th>Shift</th>
+            <th>Jenis Unit</th>
+            <th>Keterangan</th>
+            <th>Aksi</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    // Buat body
+    const tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+
+    const itemsPerPage = 25;
+    const start = currentPageShift * itemsPerPage;
+    const end = start + itemsPerPage;
+    const limitedData = data.slice(start, end);
+
+    if (data.length === 0) {
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="8" style="text-align: center; padding: 20px; color: #666;">
+                Tidak ada data yang ditemukan
+            </td>
+        </tr>`;
+        updateShiftNavigation(0, itemsPerPage);
+        return;
+    }
+
+    limitedData.forEach((item, index) => {
+        const row = document.createElement("tr");
+        row.setAttribute('data-id', index);
+        row.innerHTML = `
+    <td class="table-cell">${item.nama || "-"}</td>
+    <td class="table-cell">${item.leader || "-"}</td>
+    <td class="table-cell">${item.plot || "-"}</td>
+    <td class="table-cell">${item.tanggal || "-"}</td>
+    <td class="table-cell">${item.shift || "-"}</td>
+    <td class="table-cell">${item.jenis || "-"}</td>
+    <td class="table-cell">${item.keterangan || "-"}</td>
+    <td class="table-cell">
+        <button onclick="enableEditMode(${index})" class="btn">Edit</button>
+    </td>
+`;
+        tbody.appendChild(row);
+    });
+
+    updateShiftNavigation(data.length, itemsPerPage);
+}
+
+function enableEditMode(index) {
+    const row = document.querySelector(`tr[data-id="${index}"]`);
+    if (!row) return;
+
+    const item = dataShift[index];
+    
+    // Get all unique shift codes from shiftData for the same jenis
+    const shiftsForJenis = [...new Set(shiftData
+        .filter(s => s.jenis === item.jenis)
+        .map(s => s.kode))];
+    
+    // Create select options
+    let shiftOptions = shiftsForJenis.map(shift => 
+        `<option value="${shift}" ${shift === item.shift ? 'selected' : ''}>${shift}</option>`
+    ).join('');
+    
+    // Update the row to edit mode with better styling
+    row.innerHTML = `
+        <td class="table-cell">${item.nama || "-"}</td>
+        <td class="table-cell">${item.leader || "-"}</td>
+        <td class="table-cell">${item.plot || "-"}</td>
+        <td class="table-cell">
+            <input type="date" 
+                   id="edit-date-${index}" 
+                   value="${item.tanggal || ''}" 
+                   class="edit-mode-input">
+        </td>
+        <td class="table-cell">
+            <select id="edit-shift-${index}" class="edit-mode-select">
+                <option value="">- Pilih Shift -</option>
+                ${shiftOptions}
+            </select>
+        </td>
+        <td class="table-cell">${item.jenis || "-"}</td>
+        <td class="table-cell">${item.keterangan || "-"}</td>
+        <td class="table-cell">
+        <div class="edit-actions">
+            <button onclick="saveDataShiftEdit(${index})" 
+                    class="btn btn-simpan">
+                Simpan
+            </button>
+            <button onclick="cancelEditMode(${index})" 
+                    class="btn btn-batal">
+                Batal
+            </button>
+        </div>
+    </td>
+    `;
+    
+    // Focus on the date field
+    document.getElementById(`edit-date-${index}`).focus();
+}
+
+function saveDataShiftEdit(index) {
+    // Get the edited values
+    const newDate = document.getElementById(`edit-date-${index}`).value;
+    const newShift = document.getElementById(`edit-shift-${index}`).value;
+    
+    // Update the data
+    dataShift[index].tanggal = newDate;
+    dataShift[index].shift = newShift;
+    
+    // Save to localStorage
+    saveData();
+    
+    // Re-render the table
+    renderDataShift(dataShift);
+    
+    alert("Perubahan berhasil disimpan!");
+}
+
+function cancelEditMode(index) {
+    // Just re-render the table to exit edit mode
+    renderDataShift(dataShift);
+}
+
+      function updateShiftNavigation(totalItems, itemsPerPage) {
+        const nav = document.getElementById("shiftNavigation");
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        
+        nav.innerHTML = `
+            <div style="display: flex; gap: 10px; align-items: center;">
+                
+                <button onclick="nextShiftPage()" ${(currentPageShift + 1) * itemsPerPage >= totalItems ? "disabled" : ""}>
+                    Next Data
+                </button>
+                <button onclick="resetShiftPage()">
+                    Reset Halaman
+                </button>
+                <button onclick="hapusSemuaDataShift()" >
+                    Hapus Semua Data
+                </button>
+            </div>
+        `;
+      }
+
+      function nextShiftPage() {
+        const itemsPerPage = 25;
+        if ((currentPageShift + 1) * itemsPerPage < dataShift.length) {
+            currentPageShift++;
+            renderDataShift(dataShift);
+        }
+      }
+
+      function prevShiftPage() {
+        if (currentPageShift > 0) {
+            currentPageShift--;
+            renderDataShift(dataShift);
+        }
+      }
+
+      function resetShiftPage() {
+        currentPageShift = 0;
+        renderDataShift(dataShift);
+      }
+
+      function hapusSemuaDataShift() {
+        if (confirm("Yakin ingin menghapus SEMUA DATA SHIFT?")) {
+            dataShift = [];
+            localStorage.setItem("dataShift", JSON.stringify(dataShift));
+            currentPageShift = 0;
+            renderDataShift();
+        }
+      }
+
+      function handleImport() {
+        // Ambil nilai dari form
+        const bulan = document.getElementById("bulanImport").value.padStart(2, "0");
+        const tahun = new Date().getFullYear();
+        const jenisData = document.getElementById("jenisData").value;
+        const fileInput = document.getElementById("excelFileInput");
+
+        // Validasi input
+        if (!jenisData) {
+            alert("Silakan pilih Jenis Unit terlebih dahulu!");
+            return;
+        }
+
+        if (!fileInput.files.length) {
+            alert("Silakan pilih file Excel terlebih dahulu!");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                // Proses file Excel
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: "array" });
+                
+                // Ambil sheet pertama
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Konversi ke JSON
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                console.log("Data mentah dari Excel:", jsonData);
+
+                // Validasi data
+                if (jsonData.length < 2) {
+                    alert("File Excel tidak memiliki data yang valid!");
+                    return;
+                }
+
+                const header = jsonData[0];
+                const colNama = header.findIndex(h => 
+                    h && h.toString().toLowerCase().includes("nama")
+                );
+                const colLeader = header.findIndex(h => 
+                    h && h.toString().toLowerCase().includes("team leader")
+                );
+                const colPlot = header.findIndex(h => 
+                    h && h.toString().toLowerCase().includes("plot")
+                );
+                const colKet = header.findIndex(h => 
+                    h && h.toString().toLowerCase().includes("keterangan")
+                );
+
+                // Validasi kolom wajib
+                if (colNama === -1) {
+                    alert("File Excel harus memiliki kolom 'Nama'!");
+                    return;
+                }
+
+                const processedData = [];
+
+                // Proses setiap baris data
+                for (let i = 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (!row || row.length === 0) continue;
+
+                    const nama = (row[colNama] || "").toString().trim();
+                    const leader = (colLeader !== -1) ? (row[colLeader] || "").toString().trim() : "";
+                    const plot = (colPlot !== -1) ? (row[colPlot] || "").toString().trim() : "";
+                    const keterangan = (colKet !== -1) ? (row[colKet] || "").toString().trim() : "";
+
+                    // Temukan kolom shift (mulai dari kolom 4 atau setelah keterangan)
+                    const startShiftCol = Math.max(4, colKet + 1);
+                    
+                    // Proses untuk setiap tanggal (1-31)
+                    for (let tgl = 1; tgl <= 31; tgl++) {
+                        const colShift = startShiftCol + (tgl - 1);
+                        const shift = row[colShift] ? row[colShift].toString().trim() : "";
+                        
+                        if (shift && shift !== "") {
+                            processedData.push({
+                                mode: jenisData,
+                                nama: nama,
+                                leader: leader,
+                                plot: plot,
+                                tanggal: `${tahun}-${bulan}-${String(tgl).padStart(2, "0")}`,
+                                keterangan: keterangan,
+                                shift: shift,
+                                jenis: jenisData
+                            });
+                        }
+                    }
+                }
+
+                if (processedData.length === 0) {
+                    alert("Tidak ada data shift yang valid ditemukan dalam file!");
+                    return;
+                }
+
+                console.log("Data yang diproses:", processedData);
+
+                // Tambahkan ke data existing
+                dataShift = dataShift.concat(processedData);
+                
+                // Simpan ke localStorage
+                localStorage.setItem("dataShift", JSON.stringify(dataShift));
+                
+                // Render ulang tabel
+                renderDataShift(dataShift);
+                
+                // Reset form
+                document.getElementById("importForm").style.display = "none";
+                fileInput.value = "";
+                
+                alert(`Berhasil mengimport ${processedData.length} data shift!`);
+
+            } catch (error) {
+                console.error("Error saat mengimport:", error);
+                alert(`Terjadi kesalahan saat mengimport data:\n${error.message}`);
+            }
+        };
+
+        reader.onerror = function() {
+            alert("Gagal membaca file. Silakan coba lagi.");
+        };
+
+        reader.readAsArrayBuffer(file);
+      }
+
+      function filterDataShift() {
+        const nama = document.getElementById('searchNama').value.toLowerCase();
+        const tanggal = document.getElementById('filterTanggal').value;
+        const jenis = document.getElementById('filterJenis').value;
+        
+        let filteredData = dataShift;
+        
+        // Filter berdasarkan nama (jika ada input)
+        if (nama) {
+            filteredData = filteredData.filter(item => 
+                item.nama && item.nama.toLowerCase().includes(nama)
+            );
+        }
+        
+        // Filter berdasarkan tanggal (jika dipilih)
+        if (tanggal) {
+            filteredData = filteredData.filter(item => 
+                item.tanggal && item.tanggal === tanggal
+            );
+        }
+        
+        // Filter berdasarkan jenis (jika bukan "Semua")
+        if (jenis && jenis !== "Semua") {
+            filteredData = filteredData.filter(item => 
+                item.jenis && item.jenis === jenis
+            );
+        }
+        
+        // Reset ke halaman pertama dan render hasil filter
+        currentPageShift = 0;
+        renderDataShift(filteredData);
+      }
+
+      function resetFilterShift() {
+        // Reset nilai input
+        document.getElementById('searchNama').value = '';
+        document.getElementById('filterTanggal').value = '';
+        document.getElementById('filterJenis').value = 'Semua';
+        
+        // Reset ke halaman pertama dan render semua data
+        currentPageShift = 0;
+        renderDataShift(dataShift);
+      }
+
+      // ABSEN
+      let currentAbsenPage = 0;
+      const itemsPerAbsenPage = 10;
+
+      function toggleImportFormAbsen() {
+        const form = document.getElementById("importFormAbsen");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+      }
+
+      function handleAbsenImport() {
+        const fileInput = document.getElementById("excelFileAbsen");
+        const jenisData = document.getElementById("jenisDataAbsen").value;
+
+        if (!fileInput.files.length) {
+          alert("Silakan pilih file Excel terlebih dahulu!");
+          return;
+        }
+
+        if (!jenisData) {
+          alert("Silakan pilih Jenis Unit terlebih dahulu!");
+          return;
+        }
+
+        const file = fileInput.files[0];
+        
+        // Validasi ekstensi file
+        if (!file.name.match(/\.(xlsx|xls)$/i)) {
+          alert("Format file tidak didukung. Harus berupa .xlsx atau .xls");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          try {
+            // 1. Parse Excel file
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array", cellDates: true });
+            
+            // 2. Ambil sheet pertama
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // 3. Konversi ke JSON dengan handling format tanggal
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+              header: 1,
+              raw: false,
+              dateNF: 'dd/mm/yyyy HH:MM'
+            });
+
+            console.log("Data dari Excel:", jsonData);
+
+            // 4. Validasi struktur file
+            if (jsonData.length < 2) {
+              alert("File tidak berisi data atau format tidak sesuai!");
+              return;
+            }
+
+            const header = jsonData[0].map(h => h ? h.toString().toLowerCase().trim() : "");
+            
+            // 5. Deteksi kolom secara fleksibel
+            const getColIndex = (patterns) => {
+              for (const pattern of patterns) {
+                const index = header.findIndex(h => h.includes(pattern));
+                if (index !== -1) return index;
+              }
+              return -1;
+            };
+
+            const colNip = getColIndex(["nip", "id", "nomor"]);
+            const colNama = getColIndex(["nama", "name", "karyawan"]);
+            const colWaktu = getColIndex(["waktu", "tanggal", "date", "jam"]);
+            const colStatus = getColIndex(["status", "keterangan", "absensi", "ket"]);
+
+            // 6. Validasi kolom
+            if (colNip === -1 || colNama === -1 || colWaktu === -1 || colStatus === -1) {
+              alert(`Format file tidak valid. Kolom yang dibutuhkan:
+- NIP (header: ${header[colNip] || 'tidak ditemukan'})
+- Nama (header: ${header[colNama] || 'tidak ditemukan'}) 
+- Waktu (header: ${header[colWaktu] || 'tidak ditemukan'})
+- Status (header: ${header[colStatus] || 'tidak ditemukan'})
+
+Pastikan header kolom sesuai`);
+              return;
+            }
+
+            // 7. Proses data
+            const grouped = {};
+            const today = new Date().toISOString().split('T')[0];
+            let successCount = 0;
+
+            for (let i = 1; i < jsonData.length; i++) {
+                  try {
+                      const row = jsonData[i];
+                      if (!row || row.length === 0) continue;
+
+                      const nip = (row[colNip]?.toString()?.trim() || "");
+                      const nama = (row[colNama]?.toString()?.trim() || "");
+                      const waktuStr = (row[colWaktu]?.toString()?.trim() || "");
+                      const status = (row[colStatus]?.toString()?.trim()?.toLowerCase() || "");
+
+                      if (!nip || !nama || !waktuStr || !status) continue;
+
+                      // PERBAIKAN PARSING TANGGAL - Mulai
+                      let dateObj, timeStr;
+                      
+                      // Coba parse format DD/MM/YYYY HH:MM
+                      if (waktuStr.match(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)) {
+                          const [datePart, timePart] = waktuStr.split(' ');
+                          const [day, month, year] = datePart.split('/');
+                          dateObj = new Date(`${year}-${month}-${day}`);
+                          timeStr = timePart;
+                      } 
+                      // Coba parse format lain jika diperlukan
+                      else if (typeof row[colWaktu] === 'number') {
+                          // Handle Excel date number
+                          dateObj = XLSX.SSF.parse_date_code(row[colWaktu]);
+                          timeStr = `${String(dateObj.H).padStart(2,'0')}:${String(dateObj.M).padStart(2,'0')}`;
+                      }
+                      else {
+                          // Fallback ke new Date()
+                          dateObj = new Date(waktuStr);
+                          const [datePart, timePart] = waktuStr.split(' ');
+                          timeStr = timePart || "00:00";
+                      }
+                      
+                      // Format tanggal ke YYYY-MM-DD
+                      const dateStr = dateObj.toISOString().split('T')[0];
+                      // PERBAIKAN PARSING TANGGAL - Selesai
+
+                      const key = `${nip}|${nama}|${dateStr}`;
+
+                      if (!grouped[key]) {
+                          grouped[key] = {
+                              id: nip,
+                              nama: nama,
+                              tanggal: dateStr,
+                              jamMasuk: "",
+                              jamKeluar: "",
+                              jenis: jenisData
+                          };
+                      }
+
+                      if (status.includes("masuk")) {
+                          grouped[key].jamMasuk = timeStr;
+                      } else if (status.includes("keluar") || status.includes("pulang")) {
+                          grouped[key].jamKeluar = timeStr;
+                      }
+
+                      successCount++;
+                  } catch (err) {
+                      console.warn(`Error processing row ${i}:`, err);
+                  }
+              }
+            
+
+            // 9. Simpan data yang berhasil diimport
+            if (successCount === 0) {
+              alert("Tidak ada data yang berhasil diproses. Periksa format file!");
+              return;
+            }
+
+            absenData = [...absenData, ...Object.values(grouped)];
+            saveData();
+            renderAbsenTable();
+
+            alert(`Berhasil mengimport ${successCount} data absen dari ${jsonData.length-1} baris`);
+            document.getElementById("importFormAbsen").style.display = "none";
+            fileInput.value = "";
+
+          } catch (error) {
+            console.error("Error detail:", error);
+            alert(`Terjadi kesalahan saat memproses file. 
+            
+Detail error: ${error.message}
+
+Pastikan:
+1. File tidak corrupt
+2. Format kolom sesuai
+3. Data tanggal valid`);
+          }
+        };
+
+        reader.onerror = function(error) {
+          alert(`Gagal membaca file. Error: ${error.message}`);
+        };
+
+        reader.readAsArrayBuffer(file);
+      }
+
+      function convertExcelDateTime(value) {
+        if (typeof value === "string") return new Date(value).toISOString();
+        if (typeof value === "number") {
+          const epoch = new Date(Date.UTC(1899, 11, 30));
+          const millis = value * 24 * 60 * 60 * 1000;
+          return new Date(epoch.getTime() + millis).toISOString();
+        }
+        return new Date().toISOString();
+      }
+
+function renderAbsenTable(data = absenData) {
+    const tableBody = document.getElementById("absenTable");
+    tableBody.innerHTML = "";
+
+    // Gabungkan data shift dengan data absen
+    const combinedData = [];
+
+    // 1. Ambil semua data shift untuk jenis yang sedang aktif
+    const filteredDataShift = dataShift.filter(item => {
+        const jenisFilter = document.getElementById('filterJenisAbsen').value;
+        return (!jenisFilter || item.jenis === jenisFilter);
+    });
+
+    // 2. Buat data gabungan
+    filteredDataShift.forEach(shiftItem => {
+        // Cari data absen yang sesuai
+        const absenItem = absenData.find(absen => 
+            absen.nama === shiftItem.nama && 
+            absen.tanggal === shiftItem.tanggal &&
+            absen.jenis === shiftItem.jenis
+        );
+
+        // Jika shift OFF/LIBUR dan TIDAK ADA data absen, skip (tidak ditampilkan)
+        if ((shiftItem.shift === "OFF" || shiftItem.shift === "LIBUR") && (!absenItem || (!absenItem.jamMasuk && !absenItem.jamKeluar))) {
+            return;
+        }
+
+        if (absenItem) {
+            combinedData.push({
+                ...absenItem,
+                shift: shiftItem.shift
+            });
+        } else {
+            combinedData.push({
+                id: shiftItem.nama.split(' ')[0],
+                nama: shiftItem.nama,
+                tanggal: shiftItem.tanggal,
+                jamMasuk: null,
+                jamKeluar: null,
+                jenis: shiftItem.jenis,
+                shift: shiftItem.shift,
+                isFromShift: true
+            });
+        }
+    });
+
+    // 3. Tambahkan data absen yang tidak memiliki shift
+    absenData.forEach(absenItem => {
+        const shiftExists = dataShift.some(shiftItem => 
+            shiftItem.nama === absenItem.nama && 
+            shiftItem.tanggal === absenItem.tanggal &&
+            shiftItem.jenis === absenItem.jenis
+        );
+        
+        const jenisFilter = document.getElementById('filterJenisAbsen').value;
+        const jenisMatch = !jenisFilter || absenItem.jenis === jenisFilter;
+        
+        if (!shiftExists && jenisMatch) {
+            combinedData.push(absenItem);
+        }
+    });
+
+    // Cek jika data kosong
+    if (combinedData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="15" style="text-align: center; padding: 20px; color: #666;">
+                    Tidak ada data yang ditemukan
+                </td>
+            </tr>`;
+        return;
+    }
+
+    const startIndex = currentAbsenPage * itemsPerAbsenPage;
+    const endIndex = startIndex + itemsPerAbsenPage;
+    const dataToRender = combinedData.slice(startIndex, endIndex);
+
+    dataToRender.forEach((item, index) => {
+        const shiftItem = dataShift.find(s => 
+            s.nama === item.nama && 
+            s.tanggal === item.tanggal &&
+            s.jenis === item.jenis
+        );
+
+        let shiftCode = "-";
+        let jamMasukShift = "-";
+        let jamPulangShift = "-";
+        
+        
+        if (shiftItem) {
+            shiftCode = shiftItem.shift;
+            const shiftMaster = shiftData.find(s => 
+                s.kode === shiftItem.shift && 
+                s.jenis === item.jenis
+            );
+            
+            if (shiftMaster) {
+                jamMasukShift = shiftMaster.masuk || "-";
+                jamPulangShift = shiftMaster.keluar || "-";
+            }
+        }
+
+        const { statusMasuk, telat, statusKeluar, pulangCepat, lembur, keterangan } = hitungStatusAbsen(
+            item.jamMasuk,
+            item.jamKeluar,
+            jamMasukShift,
+            jamPulangShift,
+            shiftCode,
+            item.isFromShift,
+            item.keterangan
+        );
+
+        const row = document.createElement("tr");
+        row.setAttribute('data-absen-id', index);
+        row.innerHTML = `
+            <td>${item.nama}</td>
+            <td>${item.tanggal}</td>
+            <td>${shiftCode}</td>
+            <td>${jamMasukShift}</td>
+            <td>${item.jamMasuk || "-"}</td>
+            <td>${statusMasuk}</td>
+            <td>${telat}</td>
+            <td>${jamPulangShift}</td>
+            <td>${item.jamKeluar || "-"}</td>
+            <td>${statusKeluar}</td>
+            <td>${pulangCepat}</td>
+            <td>${lembur}</td>
+            <td class="keterangan-cell">${keterangan || "-"}</td>
+            <td>${item.jenis || "-"}</td>
+            <td class="absensi-actions">
+                <button onclick="enableEditKeterangan(${index})" class="btn">Edit</button>
+                <button onclick="hapusAbsen('${item.id || item.nama.split(' ')[0]}', '${item.tanggal}')" class="btn delete-btn">Hapus</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+      
+      function enableEditKeterangan(index) {
+    const row = document.querySelector(`tr[data-absen-id="${index}"]`);
+    if (!row) return;
+
+    const nama = row.cells[0].textContent;
+    const tanggal = row.cells[1].textContent;
+    const jenis = row.cells[13].textContent;
+    
+    // Cari data yang sesuai di absenData
+    const absenItem = absenData.find(item => 
+        item.nama === nama && 
+        item.tanggal === tanggal &&
+        item.jenis === jenis
+    );
+    
+    const currentKeterangan = absenItem?.keterangan || row.cells[12].textContent;
+    
+    // Backup original data
+    row.setAttribute('data-original-keterangan', currentKeterangan);
+    
+    // Create dropdown options
+    const options = `
+        <option value="">- Pilih -</option>
+        <option value="Cuti" ${currentKeterangan === 'Cuti' ? 'selected' : ''}>Cuti</option>
+        <option value="Sakit" ${currentKeterangan === 'Sakit' ? 'selected' : ''}>Sakit</option>
+        <option value="Hadir (Off)" ${currentKeterangan === 'Hadir (Off)' ? 'selected' : ''}>Hadir (Off)</option>
+    `;
+    
+    // Update the keterangan cell
+    row.querySelector('.keterangan-cell').innerHTML = `
+        <select class="keterangan-dropdown" id="edit-keterangan-${index}">
+            ${options}
+        </select>
+    `;
+    
+    // Update action buttons
+    row.querySelector('.absensi-actions').innerHTML = `
+        <button onclick="saveKeteranganEdit(${index})" class="btn-simpan-absen">Simpan</button>
+        <button onclick="cancelKeteranganEdit(${index})" class="btn-batal-absen">Batal</button>
+    `;
+}
+
+function saveKeteranganEdit(index) {
+    const newKeterangan = document.getElementById(`edit-keterangan-${index}`).value;
+    
+    // Dapatkan data yang sedang diedit dari tabel
+    const row = document.querySelector(`tr[data-absen-id="${index}"]`);
+    const nama = row.cells[0].textContent;
+    const tanggal = row.cells[1].textContent;
+    const jenis = row.cells[13].textContent; // Jenis Data ada di kolom ke-14 (indeks 13)
+    
+    // Cari data di absenData
+    let absenItem = absenData.find(item => 
+        item.nama === nama && 
+        item.tanggal === tanggal &&
+        item.jenis === jenis
+    );
+    
+    if (!absenItem) {
+        // Jika tidak ada, buat data baru
+        absenItem = {
+            id: nama.split(' ')[0],
+            nama: nama,
+            tanggal: tanggal,
+            jamMasuk: null,
+            jamKeluar: null,
+            jenis: jenis,
+            keterangan: newKeterangan
+        };
+        absenData.push(absenItem);
+    } else {
+        // Jika ada, update keterangan
+        absenItem.keterangan = newKeterangan;
+    }
+    
+    saveData();
+    renderAbsenTable();
+    
+    // Tampilkan notifikasi
+    alert("Perubahan berhasil disimpan!");
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+    toast.style.color = 'white';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '4px';
+    toast.style.zIndex = '1000';
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}
+
+function cancelKeteranganEdit(index) {
+    const row = document.querySelector(`tr[data-absen-id="${index}"]`);
+    if (!row) return;
+    
+    const originalKeterangan = row.getAttribute('data-original-keterangan');
+    
+    // Kembalikan tampilan ke mode normal
+    row.querySelector('.keterangan-cell').textContent = originalKeterangan || "-";
+    row.querySelector('.absensi-actions').innerHTML = `
+        <button onclick="enableEditKeterangan(${index})" class="btn">Edit</button>
+    `;
+}
+
+      // Fungsi untuk menghitung status absensi
+     function hitungStatusAbsen(jamMasukAktual, jamKeluarAktual, jamMasukShift, jamPulangShift, shiftCode, isFromShift = false, existingKeterangan = null) {
+    // Jika shift OFF/LIBUR tapi ada data absen
+    if ((shiftCode === "OFF") && (jamMasukAktual || jamKeluarAktual)) {
+        return {
+            statusMasuk: "Tidak Seharusnya Absen",
+            telat: "-",
+            statusKeluar: "Tidak Seharusnya Absen",
+            pulangCepat: "-",
+            lembur: "-",
+            keterangan: existingKeterangan
+        };
+    }
+
+    // Jika sudah ada keterangan Cuti/Sakit, langsung kembalikan
+      if (existingKeterangan && (existingKeterangan === 'Cuti' || existingKeterangan === 'Sakit' || existingKeterangan === 'Hadir (Off)')) {
+        return {
+            statusMasuk: "-",
+            telat: "-",
+            statusKeluar: "-",
+            pulangCepat: "-",
+            lembur: "-",
+            keterangan: existingKeterangan
+        };
+    }
+
+    let statusMasuk = "-";
+    let telat = "-";
+    let statusKeluar = "-";
+    let pulangCepat = "-";
+    let lembur = "-";
+    let keterangan = existingKeterangan || "Hadir";
+
+    // Kasus: Data dari shift (tidak ada absensi)
+    if (isFromShift) {
+        keterangan = "Tidak Hadir (Cuti/Sakit)";
+        return { statusMasuk, telat, statusKeluar, pulangCepat, lembur, keterangan };
+    }
+
+    // Kasus: Tidak ada jam absen sama sekali (bukan dari data shift)
+    if (!jamMasukAktual && !jamKeluarAktual) {
+        keterangan = "Tidak Hadir (Cuti/Sakit)";
+        return { statusMasuk, telat, statusKeluar, pulangCepat, lembur, keterangan };
+    }
+
+    // Kasus: Salah satu jam absen kosong
+    if (!jamMasukAktual) {
+        keterangan = "Hadir (Jam Masuk Kosong)";
+    } else if (!jamKeluarAktual) {
+        keterangan = "Hadir (Jam Keluar Kosong)";
+    }
+
+    // Helper function untuk konversi jam ke menit
+    const jamKeMenit = (jam) => {
+        if (!jam || jam === "-") return null;
+        const [hh, mm] = jam.split(":").map(Number);
+        return hh * 60 + mm;
+    };
+
+    // Hitung status masuk jika jam masuk ada dan shift ada
+    if (jamMasukAktual && jamMasukShift && jamMasukShift !== "-") {
+        const masukAktual = jamKeMenit(jamMasukAktual);
+        const masukShift = jamKeMenit(jamMasukShift);
+        
+        if (masukAktual > masukShift) {
+            const selisih = masukAktual - masukShift;
+            telat = `${selisih} menit`;
+            statusMasuk = "Terlambat";
+            if (keterangan === "Hadir") {
+                keterangan = "Hadir (Terlambat)";
+            }
+        } else {
+            statusMasuk = "Tepat waktu";
+        }
+    }
+
+    // Hitung status keluar jika jam keluar ada dan shift ada
+    if (jamKeluarAktual && jamPulangShift && jamPulangShift !== "-") {
+        const keluarAktual = jamKeMenit(jamKeluarAktual);
+        const pulangShift = jamKeMenit(jamPulangShift);
+        
+        if (keluarAktual < pulangShift) {
+            const selisih = pulangShift - keluarAktual;
+            pulangCepat = `${selisih} menit`;
+            statusKeluar = "Pulang cepat";
+            if (keterangan === "Hadir") {
+                keterangan = "Hadir (Pulang Cepat)";
+            }
+        } 
+        else if (keluarAktual > pulangShift) {
+            const selisihMenit = keluarAktual - pulangShift;
+            
+            // Hanya tampilkan lembur jika > 60 menit
+            if (selisihMenit >= 60) {
+                lembur = `${selisihMenit} menit`;
+                statusKeluar = "Lembur";
+                if (keterangan === "Hadir") {
+                    keterangan = "Hadir (Lembur)";
+                }
+            } else {
+                statusKeluar = "Tepat waktu";
+            }
+        } else {
+            statusKeluar = "Tepat waktu";
+        }
+    }
+
+    return { statusMasuk, telat, statusKeluar, pulangCepat, lembur, keterangan };
+}
+
+function bersihkanDataAbsenTidakValid() {
+    if (!confirm("Yakin ingin membersihkan data absen yang tidak valid (shift OFF tapi ada absen)?")) {
+        return;
+    }
+
+    let jumlahDihapus = 0;
+    
+    // Iterasi dari belakang untuk menghindari masalah index saat menghapus
+    for (let i = absenData.length - 1; i >= 0; i--) {
+        const absen = absenData[i];
+        const shiftItem = dataShift.find(s => 
+            s.nama === absen.nama && 
+            s.tanggal === absen.tanggal &&
+            s.jenis === absen.jenis
+        );
+        
+        // Jika shift OFF/LIBUR tapi ada data absen
+        if (shiftItem && (shiftItem.shift === "OFF" || shiftItem.shift === "LIBUR") && 
+            (absen.jamMasuk || absen.jamKeluar)) {
+            absenData.splice(i, 1);
+            jumlahDihapus++;
+        }
+    }
+    
+    if (jumlahDihapus > 0) {
+        saveData();
+        renderAbsenTable();
+        alert(`Berhasil menghapus ${jumlahDihapus} data absen tidak valid!`);
+    } else {
+        alert("Tidak ditemukan data absen tidak valid.");
+    }
+}
+
+      function hapusAbsen(id, tanggal) {
+        if (confirm("Yakin ingin menghapus data ini?")) {
+          // Cari data di absenData
+          const index = absenData.findIndex(
+            (item) => (item.id === id || item.nama.split(' ')[0] === id) && item.tanggal === tanggal
+          );
+          
+          if (index !== -1) {
+            // Hapus dari absenData jika ditemukan
+            absenData.splice(index, 1);
+          } else {
+            // Jika tidak ditemukan di absenData, ini adalah data generated dari shift
+            // Kita bisa tambahkan record absen kosong untuk menandai ketidakhadiran
+            const nama = id;
+            const shiftItem = dataShift.find(s => 
+              s.nama.includes(nama) && 
+              s.tanggal === tanggal
+            );
+            
+            if (shiftItem) {
+              absenData.push({
+                id: shiftItem.nama.split(' ')[0],
+                nama: shiftItem.nama,
+                tanggal: shiftItem.tanggal,
+                jamMasuk: null,
+                jamKeluar: null,
+                jenis: shiftItem.jenis
+              });
+            }
+          }
+          
+          saveData();
+          renderAbsenTable();
+        }
+      }
+
+      function nextAbsenPage() {
+        if ((currentAbsenPage + 1) * itemsPerAbsenPage < absenData.length) {
+          currentAbsenPage++;
+          renderAbsenTable();
+        }
+      }
+
+      function resetAbsenPage() {
+        currentAbsenPage = 0;
+        renderAbsenTable();
+      }
+
+      function hapusSemuaAbsen() {
+        if (confirm("Yakin ingin menghapus SEMUA DATA ABSEN?")) {
+            absenData = [];
+            localStorage.setItem("absenData", JSON.stringify(absenData));
+            currentAbsenPage = 0;
+            renderAbsenTable();
+        }
+      }
+
+      function filterDataAbsen() {
+        const nama = document.getElementById('searchNamaAbsen').value.toLowerCase();
+        const tanggal = document.getElementById('filterTanggalAbsen').value;
+        const jenis = document.getElementById('filterJenisAbsen').value;
+        
+        // Gabungkan data shift dan absen (kecuali shift OFF/LIBUR)
+        let filteredData = [];
+        
+        // 1. Filter data shift (kecuali OFF/LIBUR)
+        const filteredDataShift = dataShift.filter(item => {
+            const jenisMatch = !jenis || item.jenis === jenis;
+            const bukanShiftOff = item.shift !== "OFF" && item.shift !== "LIBUR";
+            return jenisMatch && bukanShiftOff;
+        });
+
+        // 2. Gabungkan dengan data absen
+        filteredDataShift.forEach(shiftItem => {
+            // Cari data absen yang sesuai
+            const absenItem = absenData.find(absen => 
+                absen.nama === shiftItem.nama && 
+                absen.tanggal === shiftItem.tanggal &&
+                absen.jenis === shiftItem.jenis
+            );
+
+            if (absenItem) {
+                // Jika ada data absen, tambahkan jika sesuai filter
+                if ((!nama || absenItem.nama.toLowerCase().includes(nama)) &&
+                    (!tanggal || absenItem.tanggal === tanggal)) {
+                    filteredData.push(absenItem);
+                }
+            } else {
+                // Jika tidak ada data absen, buat data default
+                if ((!nama || shiftItem.nama.toLowerCase().includes(nama))) {
+                    if (!tanggal || shiftItem.tanggal === tanggal) {
+                        filteredData.push({
+                            id: shiftItem.nama.split(' ')[0],
+                            nama: shiftItem.nama,
+                            tanggal: shiftItem.tanggal,
+                            jamMasuk: null,
+                            jamKeluar: null,
+                            jenis: shiftItem.jenis
+                        });
+                    }
+                }
+            }
+        });
+
+        // 3. Tambahkan data absen yang tidak memiliki shift (kecuali OFF/LIBUR)
+        absenData.forEach(absenItem => {
+            const shiftExists = dataShift.some(shiftItem => 
+                shiftItem.nama === absenItem.nama && 
+                shiftItem.tanggal === absenItem.tanggal &&
+                shiftItem.jenis === absenItem.jenis &&
+                shiftItem.shift !== "OFF" && shiftItem.shift !== "LIBUR"
+            );
+            
+            const jenisMatch = !jenis || absenItem.jenis === jenis;
+            const namaMatch = !nama || absenItem.nama.toLowerCase().includes(nama);
+            const tanggalMatch = !tanggal || absenItem.tanggal === tanggal;
+            
+            if (!shiftExists && jenisMatch && namaMatch && tanggalMatch) {
+                // Cek duplikat sebelum menambahkan
+                const alreadyExists = filteredData.some(item => 
+                    item.nama === absenItem.nama && 
+                    item.tanggal === absenItem.tanggal
+                );
+                
+                if (!alreadyExists) {
+                    filteredData.push(absenItem);
+                }
+            }
+        });
+
+        // Urutkan data berdasarkan tanggal (terbaru pertama)
+        filteredData.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+        // Reset ke halaman pertama dan render hasil filter
+        currentAbsenPage = 0;
+        window.tempFilteredData = filteredData;
+        renderAbsenTable(filteredData);
+      }
+
+      function resetFilterAbsen() {
+        // Reset nilai input
+        document.getElementById('searchNamaAbsen').value = '';
+        document.getElementById('filterTanggalAbsen').value = '';
+        document.getElementById('filterJenisAbsen').value = '';
+        
+        // Reset ke halaman pertama dan render semua data
+        currentAbsenPage = 0;
+        renderAbsenTable(absenData);
+      }
+
+      // Init load semua tabel saat halaman pertama kali dibuka
+      renderShiftTable();
+      renderDataShift(dataShift);
+      renderAbsenTable();
+
+      document.getElementById("fullscreen").addEventListener("click", () => {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen();
+        }
+      });
+
+
+      //Laporan Absen
+
+      function generateLaporan() {
+  const bulanInput = document.getElementById('filterBulanLaporan').value;
+  const [tahun, bulan] = bulanInput ? bulanInput.split('-') : [new Date().getFullYear(), String(new Date().getMonth() + 1).padStart(2, '0')];
+  
+  const awalBulan = `${tahun}-${bulan}-01`;
+  const akhirBulan = `${tahun}-${bulan}-${new Date(tahun, bulan, 0).getDate()}`;
+  
+  const shiftPerKaryawan = {};
+  
+  // 1. Hitung total shift per karyawan (kecuali OFF/LIBUR)
+  dataShift.forEach(item => {
+    if (item.tanggal >= awalBulan && item.tanggal <= akhirBulan && 
+        item.shift !== "OFF" && item.shift !== "LIBUR") {
+      if (!shiftPerKaryawan[item.nama]) {
+        shiftPerKaryawan[item.nama] = {
+          nama: item.nama,
+          totalShift: 0,
+          hadir: 0,
+          terlambat: 0,
+          pulangCepat: 0,
+          cuti: 0,
+          sakit: 0,
+          noTapIn: 0,
+          noTapOut: 0,
+          totalJamKerja: 0
+        };
+      }
+      shiftPerKaryawan[item.nama].totalShift++;
+    }
+  });
+  
+  // 2. Proses data absen
+  absenData.forEach(item => {
+    if (item.tanggal >= awalBulan && item.tanggal <= akhirBulan) {
+      if (!shiftPerKaryawan[item.nama]) {
+        shiftPerKaryawan[item.nama] = {
+          nama: item.nama,
+          totalShift: 0,
+          hadir: 0,
+          terlambat: 0,
+          pulangCepat: 0,
+          cuti: 0,
+          sakit: 0,
+          noTapIn: 0,
+          noTapOut: 0,
+          totalJamKerja: 0
+        };
+      }
+      
+      const shiftItem = dataShift.find(s => 
+        s.nama === item.nama && 
+        s.tanggal === item.tanggal &&
+        s.jenis === item.jenis
+      );
+      
+      if (shiftItem && shiftItem.shift !== "OFF" && shiftItem.shift !== "LIBUR") {
+        const shiftMaster = shiftData.find(s => s.kode === shiftItem.shift && s.jenis === item.jenis);
+        
+        const status = hitungStatusAbsen(
+          item.jamMasuk,
+          item.jamKeluar,
+          shiftMaster?.masuk,
+          shiftMaster?.keluar,
+          shiftItem.shift,
+          false,
+          item.keterangan
+        );
+        
+        if (status.keterangan === 'Cuti') {
+          shiftPerKaryawan[item.nama].cuti++;
+        } else if (status.keterangan === 'Sakit') {
+          shiftPerKaryawan[item.nama].sakit++;
+        } else {
+          if (item.jamMasuk) {
+            shiftPerKaryawan[item.nama].hadir++;
+          } else {
+            shiftPerKaryawan[item.nama].noTapIn++;
+          }
+          
+          if (!item.jamKeluar && item.jamMasuk) {
+            shiftPerKaryawan[item.nama].noTapOut++;
+          }
+          
+          if (status.telat !== "-") {
+            shiftPerKaryawan[item.nama].terlambat++;
+          }
+          
+          if (status.pulangCepat !== "-") {
+            shiftPerKaryawan[item.nama].pulangCepat++;
+          }
+          
+          if (item.jamMasuk && item.jamKeluar) {
+            const [masukH, masukM] = item.jamMasuk.split(':').map(Number);
+            const [keluarH, keluarM] = item.jamKeluar.split(':').map(Number);
+            const totalMenit = (keluarH * 60 + keluarM) - (masukH * 60 + masukM);
+            shiftPerKaryawan[item.nama].totalJamKerja += totalMenit;
+          }
+        }
+      }
+    }
+  });
+  
+  // 3. Render laporan
+  const tbody = document.getElementById('laporanTable');
+  tbody.innerHTML = '';
+  
+  // Cek jika data kosong
+  const dataKaryawan = Object.values(shiftPerKaryawan);
+  if (dataKaryawan.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="12" style="text-align: center; padding: 20px; color: #666;">
+          Tidak ada data yang ditemukan
+        </td>
+      </tr>`;
+    return;
+  }
+  
+  // Render data jika ada
+  dataKaryawan.forEach(karyawan => {
+    const persentase = karyawan.totalShift > 0 
+      ? Math.round((karyawan.hadir / karyawan.totalShift) * 100) 
+      : 0;
+    
+    const jam = Math.floor(karyawan.totalJamKerja / 60);
+    const menit = karyawan.totalJamKerja % 60;
+    const jamKerjaFormatted = karyawan.totalJamKerja > 0 
+      ? `${jam} jam ${menit} menit` 
+      : "-";
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${karyawan.nama}</td>
+      <td>${karyawan.totalShift}</td>
+      <td>${karyawan.hadir}</td>
+      <td>${karyawan.terlambat}</td>
+      <td>${karyawan.pulangCepat}</td>
+      <td>${karyawan.cuti}</td>
+      <td>${karyawan.sakit}</td>
+      <td>${karyawan.noTapIn}</td>
+      <td>${karyawan.noTapOut}</td>
+      <td>${jamKerjaFormatted}</td>
+      <td>${persentase}%</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// Fungsi untuk menampilkan form export
+function exportAbsenPerBulan() {
+    const form = document.getElementById("exportFormAbsen");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+    
+    // Set nilai default bulan ke bulan ini
+    const now = new Date();
+    const bulanIni = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('bulanExportAbsen').value = bulanIni;
+}
+
+// Fungsi untuk memproses export
+function prosesExportAbsen() {
+    const bulanInput = document.getElementById('bulanExportAbsen').value;
+    const jenisData = document.getElementById('jenisExportAbsen').value;
+    
+    if (!bulanInput) {
+        alert("Silakan pilih bulan terlebih dahulu!");
+        return;
+    }
+    
+    const [tahun, bulan] = bulanInput.split('-');
+    const awalBulan = `${tahun}-${bulan}-01`;
+    const akhirBulan = `${tahun}-${bulan}-${new Date(tahun, bulan, 0).getDate()}`;
+    
+    // Filter data absen berdasarkan bulan dan jenis
+    let dataToExport = absenData.filter(item => {
+        const tanggalMatch = item.tanggal >= awalBulan && item.tanggal <= akhirBulan;
+        const jenisMatch = !jenisData || item.jenis === jenisData;
+        return tanggalMatch && jenisMatch;
+    });
+    
+    // Gabungkan dengan data shift untuk mendapatkan info shift
+    dataToExport = dataToExport.map(item => {
+        const shiftItem = dataShift.find(s => 
+            s.nama === item.nama && 
+            s.tanggal === item.tanggal &&
+            s.jenis === item.jenis
+        );
+        
+        const shiftMaster = shiftItem ? shiftData.find(s => s.kode === shiftItem.shift && s.jenis === item.jenis) : null;
+        
+        const { statusMasuk, telat, statusKeluar, pulangCepat, lembur, keterangan } = hitungStatusAbsen(
+            item.jamMasuk,
+            item.jamKeluar,
+            shiftMaster?.masuk,
+            shiftMaster?.keluar,
+            shiftItem?.shift,
+            false,
+            item.keterangan
+        );
+        
+        return {
+            "Nama": item.nama,
+            "Tanggal": item.tanggal,
+            "Shift": shiftItem?.shift || "-",
+            "Jam Masuk Shift": shiftMaster?.masuk || "-",
+            "Jam Absen Masuk": item.jamMasuk || "-",
+            "Status Masuk": statusMasuk,
+            "Telat": telat,
+            "Jam Pulang Shift": shiftMaster?.keluar || "-",
+            "Jam Absen Keluar": item.jamKeluar || "-",
+            "Status Keluar": statusKeluar,
+            "Pulang Cepat": pulangCepat,
+            "Lembur": lembur,
+            "Keterangan": keterangan || "-",
+            "Jenis Unit": item.jenis || "-"
+        };
+    });
+    
+    // Jika tidak ada data
+    if (dataToExport.length === 0) {
+        alert("Tidak ada data absen untuk bulan dan jenis yang dipilih!");
+        return;
+    }
+    
+    // Buat worksheet
+    const ws = XLSX.utils.json_to_sheet(dataToExport);
+    
+    // Atur lebar kolom
+    ws['!cols'] = [
+        { wch: 25 }, // Nama
+        { wch: 12 }, // Tanggal
+        { wch: 8 },  // Shift
+        { wch: 15 }, // Jam Masuk Shift
+        { wch: 15 }, // Jam Absen Masuk
+        { wch: 15 }, // Status Masuk
+        { wch: 10 }, // Telat
+        { wch: 15 }, // Jam Pulang Shift
+        { wch: 15 }, // Jam Absen Keluar
+        { wch: 15 }, // Status Keluar
+        { wch: 15 }, // Pulang Cepat
+        { wch: 10 }, // Lembur
+        { wch: 15 }, // Keterangan
+        { wch: 15 }  // Jenis Data
+    ];
+    
+    // Buat workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Data Absen");
+    
+    // Export ke file Excel
+    XLSX.writeFile(wb, `Data_Absen_${tahun}_${bulan}.xlsx`);
+    
+    // Sembunyikan form export
+    document.getElementById("exportFormAbsen").style.display = "none";
+}
+
+function exportToExcel() {
+  // Siapkan data untuk export
+  const data = [
+    ["Nama", "Kehadiran Normal", "Kehadiran Rill", "Terlambat", "Pulang Cepat", 
+     "Cuti", "Sakit", "Tidak Tap-In", "Tidak Tap-Out", "Jam Kerja", "Persentase Kehadiran"]
+  ];
+  
+  // Tambahkan data dari tabel
+  const rows = document.querySelectorAll('#laporanTable tr');
+  rows.forEach(row => {
+    const rowData = [];
+    row.querySelectorAll('td').forEach(cell => {
+      rowData.push(cell.textContent);
+    });
+    data.push(rowData);
+  });
+  
+  // Buat worksheet dari data array
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  
+  // Atur styling header (opsional)
+  ws['!cols'] = [
+    {wch: 20}, // Nama
+    {wch: 12}, // Kehadiran Normal
+    {wch: 12}, // Kehadiran Rill
+    {wch: 10}, // Terlambat
+    {wch: 12}, // Pulang Cepat
+    {wch: 8},  // Cuti
+    {wch: 8},  // Sakit
+    {wch: 12}, // Tidak Tap-In
+    {wch: 12}, // Tidak Tap-Out
+    {wch: 15}, // Jam Kerja
+    {wch: 18}  // Persentase Kehadiran
+  ];
+  
+  // Buat workbook
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Laporan Absen");
+  
+  // Export ke file
+  const bulan = document.getElementById('filterBulanLaporan').value || 
+    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  XLSX.writeFile(wb, `Laporan_Absen_${bulan}.xlsx`);
+}
+
+// Backup Restore
+
+// Fungsi untuk export database
+function exportDatabase() {
+  // Kumpulkan semua data dari LocalStorage
+  const database = {
+    shiftData: JSON.parse(localStorage.getItem("shiftData")) || [],
+    karyawanData: JSON.parse(localStorage.getItem("karyawanData")) || [],
+    dataShift: JSON.parse(localStorage.getItem("dataShift")) || [],
+    absenData: JSON.parse(localStorage.getItem("absenData")) || []
+  };
+  
+  // Buat blob dari data
+  const blob = new Blob([JSON.stringify(database, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  // Buat link download
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `backup_absensi_${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  alert('Backup database berhasil!');
+}
+
+// Fungsi untuk import database
+function importDatabase() {
+  const fileInput = document.getElementById('importFile');
+  const file = fileInput.files[0];
+  
+  if (!file) {
+    alert('Pilih file backup terlebih dahulu!');
+    return;
+  }
+  
+  if (!confirm('Apakah Anda yakin? Semua data saat ini akan diganti dengan data dari file backup!')) {
+    return;
+  }
+  
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    try {
+      const database = JSON.parse(e.target.result);
+      
+      // Validasi struktur file
+      if (!database.shiftData || !database.dataShift || !database.absenData) {
+        throw new Error('Format file backup tidak valid');
+      }
+      
+      // Simpan ke LocalStorage
+      localStorage.setItem("shiftData", JSON.stringify(database.shiftData));
+      localStorage.setItem("karyawanData", JSON.stringify(database.karyawanData || []));
+      localStorage.setItem("dataShift", JSON.stringify(database.dataShift));
+      localStorage.setItem("absenData", JSON.stringify(database.absenData));
+      
+      // Reload data di memory
+      shiftData = database.shiftData;
+      karyawanData = database.karyawanData || [];
+      dataShift = database.dataShift;
+      absenData = database.absenData;
+      
+      // Render ulang semua tabel
+      renderShiftTable();
+      renderDataShift();
+      renderAbsenTable();
+      
+      alert('Restore data berhasil!');
+      fileInput.value = '';
+      
+    } catch (error) {
+      console.error('Error saat import:', error);
+      alert(`Gagal import: ${error.message}`);
+    }
+  };
+  
+  reader.onerror = function() {
+    alert('Gagal membaca file');
+  };
+  
+  reader.readAsText(file);
+}
+
+    </script>
+  </body>
+</html>
